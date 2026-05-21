@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "name": "General category search with budget",
+      "method": "POST",
+      "path": "/",
+      "body": { "query": "gaming laptop", "budget": "$800" },
+      "expectedStatus": 200,
+      "expectedBody": { "results": [] },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Specific product search",
+      "method": "POST",
+      "path": "/",
+      "body": { "query": "Sony WH-1000XM5" },
+      "expectedStatus": 200,
+      "expectedBody": { "query_type": "specific" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Missing query returns 400",
+      "method": "POST",
+      "path": "/",
+      "body": {},
+      "expectedStatus": 400,
+      "expectedBody": { "error": "Query is required" },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
