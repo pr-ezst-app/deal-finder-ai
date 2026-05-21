@@ -11,9 +11,9 @@ const MOCK_DEALS = [
     originalPrice: 399,
     targetPrice: 230,
     stores: [
-      { name: "Amazon", price: 249, logo: "🛒" },
-      { name: "Best Buy", price: 279, logo: "💙" },
-      { name: "Walmart", price: 289, logo: "⭐" },
+      { name: "Amazon", price: 249, logo: "🛒", url: "https://www.amazon.com/s?k=Sony+WH-1000XM5" },
+      { name: "Best Buy", price: 279, logo: "💙", url: "https://www.bestbuy.com/site/searchpage.jsp?st=Sony+WH-1000XM5" },
+      { name: "Walmart", price: 289, logo: "⭐", url: "https://www.walmart.com/search?q=Sony+WH-1000XM5" },
     ],
     priceHistory: [399, 379, 349, 319, 289, 269, 249],
     alert: true,
@@ -29,9 +29,9 @@ const MOCK_DEALS = [
     originalPrice: 1299,
     targetPrice: 1000,
     stores: [
-      { name: "Apple", price: 1099, logo: "🍎" },
-      { name: "Amazon", price: 1089, logo: "🛒" },
-      { name: "B&H", price: 1079, logo: "📷" },
+      { name: "Apple", price: 1099, logo: "🍎", url: "https://www.apple.com/shop/buy-mac/macbook-air/13-inch" },
+      { name: "Amazon", price: 1089, logo: "🛒", url: "https://www.amazon.com/s?k=MacBook+Air+M3+13" },
+      { name: "B&H", price: 1079, logo: "📷", url: "https://www.bhphotovideo.com/c/search?q=MacBook+Air+M3" },
     ],
     priceHistory: [1299, 1249, 1199, 1149, 1099],
     alert: false,
@@ -47,9 +47,9 @@ const MOCK_DEALS = [
     originalPrice: 150,
     targetPrice: 75,
     stores: [
-      { name: "Nike", price: 150, logo: "✔️" },
-      { name: "Amazon", price: 89, logo: "🛒" },
-      { name: "Foot Locker", price: 110, logo: "👟" },
+      { name: "Nike", price: 150, logo: "✔️", url: "https://www.nike.com/w?q=Air+Max+270" },
+      { name: "Amazon", price: 89, logo: "🛒", url: "https://www.amazon.com/s?k=Nike+Air+Max+270" },
+      { name: "Foot Locker", price: 110, logo: "👟", url: "https://www.footlocker.com/search?query=Nike+Air+Max+270" },
     ],
     priceHistory: [150, 140, 120, 100, 89],
     alert: true,
@@ -65,9 +65,9 @@ const MOCK_DEALS = [
     originalPrice: 749,
     targetPrice: 600,
     stores: [
-      { name: "Dyson", price: 749, logo: "🔵" },
-      { name: "Amazon", price: 649, logo: "🛒" },
-      { name: "Target", price: 699, logo: "🎯" },
+      { name: "Dyson", price: 749, logo: "🔵", url: "https://www.dyson.com/vacuum-cleaners/cordless/v15" },
+      { name: "Amazon", price: 649, logo: "🛒", url: "https://www.amazon.com/s?k=Dyson+V15" },
+      { name: "Target", price: 699, logo: "🎯", url: "https://www.target.com/s?searchTerm=Dyson+V15" },
     ],
     priceHistory: [749, 729, 699, 679, 649],
     alert: false,
@@ -83,9 +83,9 @@ const MOCK_DEALS = [
     originalPrice: 69,
     targetPrice: 50,
     stores: [
-      { name: "PlayStation", price: 69, logo: "🎮" },
-      { name: "Amazon", price: 59, logo: "🛒" },
-      { name: "GameStop", price: 64, logo: "🕹️" },
+      { name: "PlayStation", price: 69, logo: "🎮", url: "https://direct.playstation.com/en-us/accessories/controllers" },
+      { name: "Amazon", price: 59, logo: "🛒", url: "https://www.amazon.com/s?k=PS5+DualSense+Controller" },
+      { name: "GameStop", price: 64, logo: "🕹️", url: "https://www.gamestop.com/search#q=PS5+DualSense" },
     ],
     priceHistory: [69, 66, 64, 61, 59],
     alert: false,
@@ -101,9 +101,9 @@ const MOCK_DEALS = [
     originalPrice: 139,
     targetPrice: 89,
     stores: [
-      { name: "Amazon", price: 99, logo: "🛒" },
-      { name: "Best Buy", price: 119, logo: "💙" },
-      { name: "Target", price: 109, logo: "🎯" },
+      { name: "Amazon", price: 99, logo: "🛒", url: "https://www.amazon.com/s?k=Kindle+Paperwhite+11th+Generation" },
+      { name: "Best Buy", price: 119, logo: "💙", url: "https://www.bestbuy.com/site/searchpage.jsp?st=Kindle+Paperwhite" },
+      { name: "Target", price: 109, logo: "🎯", url: "https://www.target.com/s?searchTerm=Kindle+Paperwhite" },
     ],
     priceHistory: [139, 129, 119, 109, 99],
     alert: true,
@@ -296,32 +296,43 @@ function DealCard({ deal, index }: { deal: typeof MOCK_DEALS[0]; index: number }
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3 font-syne">Price Comparison</p>
           <div className="space-y-2">
             {deal.stores.map((s, i) => (
-              <div key={s.name} className="flex items-center justify-between">
+              <a
+                key={s.name}
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center justify-between rounded-xl px-3 py-2 transition-all hover:bg-secondary group"
+              >
                 <div className="flex items-center gap-2">
                   <span>{s.logo}</span>
-                  <span className="text-sm text-foreground">{s.name}</span>
+                  <span className="text-sm text-foreground group-hover:underline underline-offset-2">{s.name}</span>
                   {i === 0 && (
                     <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: "rgba(16,185,129,0.2)", color: "#10b981" }}>Best</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-sm font-bold ${i === 0 ? "" : "text-foreground"}`} style={i === 0 ? { color: "#10b981" } : {}}>
+                  <span className="text-sm font-bold" style={i === 0 ? { color: "#10b981" } : { color: "hsl(var(--foreground))" }}>
                     ${s.price}
                   </span>
                   {i > 0 && (
                     <span className="text-xs text-muted-foreground">+${s.price - deal.stores[0].price}</span>
                   )}
+                  <Icon name="ExternalLink" size={12} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-              </div>
+              </a>
             ))}
           </div>
-          <button
-            className="mt-4 w-full py-2.5 rounded-xl font-syne font-semibold text-sm text-white transition-all hover:opacity-90"
-            style={{ background: "linear-gradient(135deg, hsl(25,100%,55%), hsl(0,100%,60%))" }}
+          <a
+            href={deal.stores[0].url}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
+            className="mt-4 w-full py-2.5 rounded-xl font-syne font-semibold text-sm text-white transition-all hover:opacity-90 flex items-center justify-center gap-2"
+            style={{ background: "linear-gradient(135deg, hsl(25,100%,55%), hsl(0,100%,60%))" }}
           >
-            View Best Deal →
-          </button>
+            View Best Deal <Icon name="ExternalLink" size={14} />
+          </a>
         </div>
       )}
     </div>
