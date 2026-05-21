@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
+import AiDealFinder from "@/components/AiDealFinder";
 
 const MOCK_DEALS = [
   {
@@ -430,6 +431,8 @@ export default function Index() {
         </div>
 
         <StatsBar />
+
+        <AiDealFinder />
 
         {/* Search + Filters */}
         <div

@@ -1,73 +1,77 @@
 """
 AI Deal Finder — accepts a product query + optional budget,
 returns AI-generated deal recommendations with specs, prices, and store links.
+Uses Groq API (llama-3.3-70b) — fast and geo-unrestricted.
 """
 
 import json
 import os
 import urllib.request
-import urllib.error
 
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 
 SYSTEM_PROMPT = """You are an expert shopping assistant and deal finder.
-When given a product query and optional budget, you analyze the market and return the best value options.
+When given a product query and optional budget, analyze the market and return the best value options.
 
 For SPECIFIC products (e.g. "Sony WH-1000XM5"): return 3 store options with prices.
 For GENERAL categories (e.g. "gaming laptop", "wireless headphones under $200"):
-  - Recommend 3 specific products that best fit the budget & use case
-  - For each: name, why it's the best value, key specs, estimated price, stores to buy from
+  - Recommend 3 specific product models that best fit the budget and use case
+  - For each: full model name, why it is the best value, key specs, estimated street price, stores
 
-Always respond with valid JSON only. No markdown, no extra text.
+Always respond with valid JSON only. No markdown fences, no extra text — raw JSON only.
 
-JSON format:
+Required JSON structure:
 {
-  "query_type": "specific or general",
+  "query_type": "general",
   "summary": "1-2 sentence expert summary of the best approach for this budget/query",
   "results": [
     {
       "rank": 1,
-      "name": "Full product name",
-      "emoji": "relevant emoji",
-      "why": "1 sentence on why this is the best value pick",
-      "specs": ["spec 1", "spec 2", "spec 3", "spec 4"],
+      "name": "Full product model name",
+      "emoji": "single relevant emoji",
+      "why": "One sentence explaining why this is the best value pick",
+      "specs": ["Key spec 1", "Key spec 2", "Key spec 3", "Key spec 4"],
       "price_range": "$XXX - $XXX",
       "best_price": 299,
       "value_score": 92,
       "stores": [
-        { "name": "Amazon", "price": 299, "url": "https://www.amazon.com/s?k=PRODUCT+NAME" },
-        { "name": "Best Buy", "price": 319, "url": "https://www.bestbuy.com/site/searchpage.jsp?st=PRODUCT+NAME" },
-        { "name": "Walmart", "price": 309, "url": "https://www.walmart.com/search?q=PRODUCT+NAME" }
+        { "name": "Amazon", "price": 299, "url": "https://www.amazon.com/s?k=Product+Name+Here" },
+        { "name": "Best Buy", "price": 319, "url": "https://www.bestbuy.com/site/searchpage.jsp?st=Product+Name+Here" },
+        { "name": "Walmart", "price": 309, "url": "https://www.walmart.com/search?q=Product+Name+Here" }
       ]
     }
   ]
 }
 
-For store URLs always use real search URLs with the product name URL-encoded.
-Value score is 0-100 based on price-to-performance ratio for the budget."""
+Rules:
+- value_score is 0-100 based on price-to-performance for the stated budget
+- Store URLs must use real search URLs with the product name URL-encoded (spaces as +)
+- Always return exactly 3 results
+- query_type must be either "specific" or "general"
+"""
 
 
-def call_openai(query: str, budget: str) -> dict:
+def call_groq(query: str, budget: str) -> dict:
     user_message = f"Product query: {query}"
     if budget:
         user_message += f"\nBudget: {budget}"
 
     payload = json.dumps({
-        "model": "gpt-4o-mini",
+        "model": "llama-3.3-70b-versatile",
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_message},
         ],
         "temperature": 0.3,
-        "max_tokens": 1500,
+        "max_tokens": 1800,
     }).encode("utf-8")
 
     req = urllib.request.Request(
-        "https://api.openai.com/v1/chat/completions",
+        "https://api.groq.com/openai/v1/chat/completions",
         data=payload,
         headers={
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {OPENAI_API_KEY}",
+            "Authorization": f"Bearer {GROQ_API_KEY}",
         },
         method="POST",
     )
@@ -85,7 +89,7 @@ def call_openai(query: str, budget: str) -> dict:
 
 
 def handler(event: dict, context) -> dict:
-    """AI-powered deal finder: analyzes product queries and returns best value recommendations with store links."""
+    """AI deal finder: takes a product query + budget and returns the 3 best value picks with store links."""
 
     cors_headers = {
         "Access-Control-Allow-Origin": "*",
@@ -108,7 +112,7 @@ def handler(event: dict, context) -> dict:
             "body": json.dumps({"error": "Query is required"}),
         }
 
-    data = call_openai(query, budget)
+    data = call_groq(query, budget)
 
     return {
         "statusCode": 200,
